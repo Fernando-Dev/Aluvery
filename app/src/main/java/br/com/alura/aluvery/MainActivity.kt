@@ -20,7 +20,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun App() {
     AluveryTheme {
-        Surface {// manter as cores do material design
+        Surface {// manter as cores do material designer
             HomeScreen()
         }
     }
