@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -25,46 +26,41 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import br.com.alura.aluvery.model.Product
+import br.com.alura.aluvery.sampledata.sampleProducts
 import br.com.alura.aluvery.sampledata.sampleSections
+import br.com.alura.aluvery.ui.components.CardProductItem
 import br.com.alura.aluvery.ui.components.ProductSection
+import br.com.alura.aluvery.ui.components.SearchTextField
 import br.com.alura.aluvery.ui.theme.AluveryTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    sections: Map<String, List<Product>>
+    sections: Map<String, List<Product>>,
+    searchText: String = ""
 ) {
     Column {
         //states
-        var text by remember {mutableStateOf("")}
+        var text by remember { mutableStateOf(searchText) }
+        //nessa parte verificamos com o remember se a variavel text
+        // tem modificacao, e no caso positivo devemos executar o filtro
+        // na lista caso ela não seja nula
+        val searchProducts = remember(text) {
+            if (text.isNotBlank()) {
+                sampleProducts.filter { product ->
+                    product.name.contains(text, ignoreCase = true) ||
+                            product.description?.contains(text, ignoreCase = true) ?: false
+                }
+            } else {
+                emptyList()
+            }
+        }
 
         //composable
-        OutlinedTextField(
-            value = text,
-            onValueChange = { newText ->
+        SearchTextField(
+            searchText = text,
+            onSearchChange = { newText ->
                 text = newText
-            },
-            Modifier.padding(
-                start = 16.dp,
-                top = 16.dp,
-                end = 16.dp
-            ).fillMaxWidth(),
-            shape = RoundedCornerShape(100),
-            leadingIcon = {
-                Box() {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "icone de lupa"
-                    )
-                }
-            },
-            label = {
-                Text(
-                    text = "Produto"
-                )
-            },
-            placeholder = {
-                Text(text= "O que você procura?")
             }
         )
 
@@ -72,15 +68,24 @@ fun HomeScreen(
             Modifier
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(vertical = 16.dp)
+            contentPadding = PaddingValues(bottom = 16.dp)
         ) {
-            sections.forEach { section ->
-                val title = section.key
-                val products = section.value
-                item {
-                    ProductSection(
-                        title,
-                        products
+            if (text.isBlank()) {
+                sections.forEach { section ->
+                    val title = section.key
+                    val products = section.value
+                    item {
+                        ProductSection(
+                            title,
+                            products
+                        )
+                    }
+                }
+            } else {
+                items(searchProducts) { p ->
+                    CardProductItem(
+                        product = p,
+                        Modifier.padding(horizontal = 16.dp)
                     )
                 }
             }
@@ -95,6 +100,19 @@ private fun HomeScreenPreview() {
         Surface {
             HomeScreen(
                 sampleSections
+            )
+        }
+    }
+}
+
+@Preview(showSystemUi = true)
+@Composable
+private fun HomeScreenWithSearchTextPreview() {
+    AluveryTheme {
+        Surface {
+            HomeScreen(
+                sampleSections,
+                searchText = "pizza"
             )
         }
     }
