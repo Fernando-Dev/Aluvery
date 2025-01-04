@@ -1,7 +1,6 @@
 package br.com.alura.aluvery.sampledata
 
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
-import br.com.alura.aluvery.R
 import br.com.alura.aluvery.model.Product
 import java.math.BigDecimal
 
